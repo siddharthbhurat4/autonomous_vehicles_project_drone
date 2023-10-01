@@ -84,4 +84,6 @@ sdot(9) = angular_vel(3);
 sdot(10) = pdot;
 sdot(11) = qdot;
 sdot(12) = rdot;
+state_vector = [x,y,z,u,v,w,phi,theta,phsi,p,q,r];
+A = jacobian(sdot,state_vector)
 end
