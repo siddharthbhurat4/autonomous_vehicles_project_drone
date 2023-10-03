@@ -7,7 +7,7 @@ function sdot = eom_nonlinear(t, s)
     g = 9.81;                       % gravity (m/s^2)
     Ix = 7.5*(10^-3);%4.856*1e-3;   % moment of inertia around x body frame (kg m^2)
     Iy = 7.5*(10^-3);%4.856*1e-3;   % moment of inertia around y body frame (kg m^2)
-    Iz = 1.3^(10^-2);%8.801*1e-3;   % moment of inertia around z body frame (kg m^2)
+    Iz = 1.3*(10^-2);%8.801*1e-3;   % moment of inertia around z body frame (kg m^2)
     l = 0.23; %0.225;               % distance from z body frame to rotor axis (m)
     k = 3.13*(10^-5);%2.980*1e-6;   % lift constant (thrust)
     b = 1.14*1e-7;                  % drag constant (torque)
@@ -17,11 +17,16 @@ function sdot = eom_nonlinear(t, s)
     
     % Defining input
     omega_eq = sqrt((m*g/4)/k);     % By solving for u when sdot = 0 = f(s,u)
-    dspeed = 0.05*omega_eq;         % Creating a small variation around equilibrium
-    omega1 = omega_eq + dspeed;
-    omega2 = omega_eq - dspeed;
-    omega3 = omega_eq + dspeed;
-    omega4 = omega_eq - dspeed;
+    dspeed = 0.001*omega_eq;         % Creating a small variation around equilibrium
+    omega1 = omega_eq;% + dspeed;
+    omega2 = omega_eq;% - dspeed;
+    omega3 = omega_eq;% + dspeed;
+    omega4 = omega_eq;% - dspeed;
+
+    % omega1 = 190.711;
+    % omega2 = 254.714;
+    % omega3 = 190.711;
+    % omega4 = 254.714;
     
     % State Vars
     % x, y, z           linear position in world frame
@@ -42,9 +47,9 @@ function sdot = eom_nonlinear(t, s)
     r = s(12);
     
     F = k*(omega1^2 + omega2^2 + omega3^2 + omega4^2);  % Total thrust (force in z body)
-    tau_phi = k*l*(omega4^2-omega2^2);                  % Torque (x body) 
+    tau_phi = k*l*(-omega2^2+omega4^2);                  % Torque (x body) 
     tau_theta = k*l*(omega3^2-omega1^2);                % Torque (y body)
-    tau_psi = b*(omega1^2-omega2^2+omega3^2-omega4^2);  % Torque (z body)
+    tau_psi = b*(-omega1^2+omega2^2-omega3^2+omega4^2);  % Torque (z body)
     
     % Translational Kinematics
     Rb2w = get_rotation_zyx(phi,theta,psi);     % Compute rotation matrix from body
