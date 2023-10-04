@@ -18,15 +18,28 @@ function sdot = eom_nonlinear(t, s)
     % Defining input
     omega_eq = sqrt((m*g/4)/k);     % By solving for u when sdot = 0 = f(s,u)
     dspeed = 0.001*omega_eq;         % Creating a small variation around equilibrium
-    omega1 = omega_eq;% + dspeed;
+    
+    % Hover
+    % omega1 = omega_eq;
+    % omega2 = omega_eq;
+    % omega3 = omega_eq;
+    % omega4 = omega_eq;
+    
+    % Test pitch and roll
+    omega1 = omega_eq + dspeed;
     omega2 = omega_eq;% - dspeed;
     omega3 = omega_eq;% + dspeed;
     omega4 = omega_eq;% - dspeed;
+    
+    % Hover and rotate
+    % alpha : desired yaw angular acceleration 
+    % |alpha|< (b*g*m)/(Iz*k) : 1.775
 
-    % omega1 = 190.711;
-    % omega2 = 254.714;
-    % omega3 = 190.711;
-    % omega4 = 254.714;
+    % alpha = 0.5;
+    % omega1 = sqrt((b*g*m-Iz*k*alpha)/(4*b*k));
+    % omega2 = sqrt((b*g*m+Iz*k*alpha)/(4*b*k));
+    % omega3 = sqrt((b*g*m-Iz*k*alpha)/(4*b*k));
+    % omega4 = sqrt((b*g*m+Iz*k*alpha)/(4*b*k));
     
     % State Vars
     % x, y, z           linear position in world frame

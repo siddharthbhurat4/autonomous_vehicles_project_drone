@@ -15,5 +15,5 @@ legend('x','y','z','$\phi$','$\theta$','$\psi$','$\dot{x}$','$\dot{y}$','$\dot{z
 
 figure(2)
 positions = s(:,1:3);
-angles = s(:,4:6);
+angles = s(:,7:9);
 animate(positions,angles,l);
