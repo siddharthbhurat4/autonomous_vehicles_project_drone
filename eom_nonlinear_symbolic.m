@@ -8,11 +8,12 @@ syms p q r real
 syms m g Ix Iy Iz real 
 syms K l b Ax Ay Az real %k-lift constant, b- drag constant
 syms omega omega1 omega2 omega3 omega4 real
+
 % m = 0.6461009174; %0.468;
 % g = 9.81;
 % Ix = 7.5*(10^-3);%4.856*1e-3;
 % Iy = 7.5*(10^-3);%4.856*1e-3;
-% Iz = 1.3^(10^-2);%8.801*1e-3;
+% Iz = 1.3*(10^-2);%8.801*1e-3;
 % l = 0.23; %0.225;
 % K = 3.13*(10^-5);%2.980*1e-6;
 % b = 1.14*1e-7;
@@ -20,12 +21,13 @@ syms omega omega1 omega2 omega3 omega4 real
 % params.Ay = 0.25*0;
 % params.Az = 0.25*0;
 
-omega = sqrt((m*g/4)/K);
-dspeed = 0.05*omega;
-omega1 = omega;%+(0.5*dspeed);
-omega2 = omega;%-(0.5*dspeed);
-omega3 = omega-dspeed;%+(0.5*dspeed);
-omega4 = omega;%-(0.5*dspeed);
+% omega = 
+% dspeed = 0.05*omega;
+% omega1 = sqrt((m*g/4)/K);%+(0.5*dspeed);
+% omega2 = sqrt((m*g/4)/K);%-(0.5*dspeed);
+% omega3 = sqrt((m*g/4)/K);%-dspeed;%+(0.5*dspeed);
+% omega4 = sqrt((m*g/4)/K);%-(0.5*dspeed);
+
 
 %state vars
 % x = s(1);
@@ -44,7 +46,7 @@ omega4 = omega;%-(0.5*dspeed);
 F = K*(omega1^2 + omega2^2 + omega3^2 + omega4^2);
 tau_phi = K*l*(omega4^2-omega2^2);
 tau_theta = K*l*(omega3^2-omega1^2);
-tau_psi = b*(omega1^2+omega2^2+omega3^2+omega4^2);
+tau_psi = b*(-omega1^2+omega2^2-omega3^2+omega4^2);
 
 %Translational Kinematics
 rotm_transkin = [cos(phsi)*cos(theta), cos(phsi)*sin(theta)*sin(phi)-sin(phsi)*cos(phi), cos(phsi)*sin(theta)*cos(phi)+sin(phsi)*sin(phi);
@@ -83,6 +85,21 @@ sdot(11) = qdot;
 sdot(12) = rdot;
 
 state_vector = [x,y,z,u,v,w,phi,theta,phsi,p,q,r];
+input_vector = [omega1,omega2,omega3,omega4];
+omega_1 = sqrt((9.81*0.6461)/(3.13*(10^-5)))/2;
+omega_2 = -sqrt((9.81*0.6461)/(3.13*(10^-5)))/2;
+omega_3 = sqrt((9.81*0.6461)/(3.13*(10^-5)))/2;
+omega_4 = -sqrt((9.81*0.6461)/(3.13*(10^-5)))/2;
+
 A = jacobian(sdot,state_vector);
-disp(A)
+sub_A = subs(A,{x,y,z,u,v,w,phi,theta,phsi,p,q,r, m, K, g, b,l,Ix,Iy,Iz}, {0,0,0,0,0,0,0,0,0,0,0,0,0.6461,3.13*(10^-5),9.81,1.14*1e-7,0.23,7.5*(10^-3),7.5*(10^-3),1.3*(10^-2)});
+% disp(sub_A)
+% eigen_vals = eig(sub_A)
+B = jacobian(sdot,input_vector);
+sub_B = subs(B,{omega1, omega2, omega3, omega4, m, K, g, b,l,Ix,Iy,Iz}, {omega_1,omega_2,omega_3,omega_4,0.6461,3.13*(10^-5),9.81,1.14*1e-7,0.23,7.5*(10^-3),7.5*(10^-3),1.3*(10^-2)});
+% sub_B = subs(sub_B, {m,g,K}, {0.6461,9.81,3.13*(10^-5)})
+disp("A_linearized")
+disp(vpa(sub_A))
+disp("B_linearized")
+disp(vpa(sub_B))
 end
