@@ -1,19 +1,25 @@
 clear;
 close all;
-s0 = zeros(12,1);   % state initial conditions
-T = 5;             % time horizon (sec)
+s0 = ones(12,1);   % state initial conditions
+%s0 = [0;4;0;0;0;0;0;0;0;0;0;0];
+%s0 = [0;0;0;0;0;0;0;0;0;0;0;0];
+T = 10;             % time horizon (sec)
 
 tspan = [0 T];
 
-[t s] = ode45(@eom_nonlinear,tspan,s0);
-l = 0.225;
-
+[t s] = ode45(@eom,tspan,s0);
 
 figure(1)
-plot(t,s);
+p=plot(t,s,'LineWidth',1);
+p(1).LineStyle = '--'; 
+p(2).LineStyle = '--';
+p(3).LineStyle = '--';
+p(7).LineStyle = '-.';
+p(8).LineStyle = '-.';
+p(9).LineStyle = '-.';
 legend('x','y','z','$\phi$','$\theta$','$\psi$','$\dot{x}$','$\dot{y}$','$\dot{z}$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','Interpreter','latex','Fontsize',12)
 
 figure(2)
 positions = s(:,1:3);
 angles = s(:,7:9);
-animate(positions,angles,l);
+animate(positions,angles);

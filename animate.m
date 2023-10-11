@@ -1,4 +1,5 @@
-function animate(positions,angles,l)
+function animate(positions,angles)
+    [m,g,Ix,Iy,Iz,l,k,b]=get_model();
     axle_x = [-l/2 0 0;
                l/2 0 0];
     axle_y = [0 -l/2 0;
