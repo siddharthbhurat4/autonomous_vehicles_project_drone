@@ -10,9 +10,8 @@ u_nom = [omega1;omega2;omega3;omega4];
 s_nom = [0;0;0;0;0;0;0;0;0;0;0;0];
 
 [A,B]=eval_jacobian(s_nom,u_nom);
-%Q=diag([80 80 80 10 10 10 12 12 12 8 8 8]); 
-Q=diag([50 50 50 5 5 5 2 2 2 1 1 1]);
-R=diag([1/225 1/225 1/225 1/225]); 
+Q=diag([50 50 60 5 5 5 5 5 5 10 10 10]);
+R=diag([1/600 1/600 1/600 1/600]); 
 [K,S,P]=lqr(A,B,Q,R);
 disp(P)
 disp(K)

@@ -1,10 +1,10 @@
 clear;
 close all;
 %s0 = ones(12,1);   % state initial conditions
-s0 = [0;3;0;0;0;0;0;0;0;0;0;0];
+s0 = [0;6;0;0;0;0;0;0;0;0;0;0];
 %s0 = [0;2;0;0;0;0;0;0;0;0;0;-2];
 %s0 = [0;0;0;0;0;0;0;0;0;0;0;0];
-T = 10;             % time horizon (sec)
+T = 8;             % time horizon (sec)
 
 tspan = [0 T];
 
@@ -22,7 +22,6 @@ legend('x','y','z','$\phi$','$\theta$','$\psi$','$\dot{x}$','$\dot{y}$','$\dot{z
 
 
 figure(2)
-pause(0.05)
 positions = s(:,1:3);
 angles = s(:,7:9);
 animate(positions,angles);
