@@ -1,9 +1,9 @@
-function sdot = eom(t, s)
+function sdot = eom(t, s, s_nom)
 % Computes the continuous-time nonlinear state equation 
 %   sdot = f(s,u)
     [m,g,Ix,Iy,Iz,l,k,b]=get_model();
     
-    s_nom = [0;0;0;0;0;0;0;0;0;0;0;0];
+    %s_nom = [0;0;0;0;0;0;0;0;0;0;0;0];
     u_nom = get_u_nom(0,0); % Hover
 
     delta_s = s-s_nom;
