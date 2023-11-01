@@ -1,4 +1,4 @@
-function animate(positions,angles)
+function animate(positions,angles,trajectory)
     [m,g,Ix,Iy,Iz,l,k,b]=get_model();
     axle_x = [-l/2 0 0;
                l/2 0 0];
@@ -18,7 +18,6 @@ function animate(positions,angles)
     [p1,q1] = size(propeller);
     [p2,q2] = size(axle_x);
     [mm,nn] = size(angles);
-    
     for ii=1:mm
         x = positions(ii,1);
         y = positions(ii,2);
@@ -51,18 +50,19 @@ function animate(positions,angles)
         new_propeller3 = new_axle_x(2,:) + new_propeller;
         new_propeller2 = new_axle_y(1,:) + new_propeller;
         new_propeller4 = new_axle_y(2,:) + new_propeller;
-    
+            plot3(trajectory(:,1),trajectory(:,2),trajectory(:,3),'o--');
+
          line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
          line(new_axle_y(:,1),new_axle_y(:,2),new_axle_y(:,3),'Linewidth',2);
         patch(new_propeller1(:,1),new_propeller1(:,2),new_propeller1(:,3),'r');
         patch(new_propeller2(:,1),new_propeller2(:,2),new_propeller2(:,3),'g');
         patch(new_propeller3(:,1),new_propeller3(:,2),new_propeller3(:,3),'b');
         patch(new_propeller4(:,1),new_propeller4(:,2),new_propeller4(:,3),'c');
-        axis(1.2*[-dmax dmax -dmax dmax -dmax dmax]);
+        axis(1.2*[-dmax dmax -dmax dmax 0 dmax]);
         xlabel('x'); ylabel('y'); zlabel('z');
         %view(0,90)
         view(3)
-        pause(0.01)
+        pause(0.001)
         if (ii~=mm)
             clf
         end

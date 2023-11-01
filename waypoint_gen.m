@@ -2,7 +2,7 @@ function waypoint_list = waypoint_gen(waypoints)
     sz = size(waypoints);
     waypoints = [zeros(1,sz(2));waypoints];
     
-    max_dist = 3;
+    max_dist = 1.5;
     
     waypoint_list = [];
     for i = 1:sz(1)

@@ -15,6 +15,9 @@ time     = 0; % current time
 curr_state = s0;
 
 s_save = [];
+t_save = [];
+traj_save = [];
+
 
 load('waypoints_file.mat');
 trajectory = waypoint_gen(waypoints_checkpoint2);
@@ -27,8 +30,9 @@ for iter = 1:max_iter
     curr_state    = s(end, :)';
     time = time + cstep;
     s_save = [s_save; s];
-
-    if norm(s_nom(1:3) - curr_state(1:3))<0.3
+    t_save = [t_save; t];
+    traj_save = [traj_save,s_nom];
+    if norm(s_nom(1:3) - curr_state(1:3))<0.4
         if current_traj_idx < size(trajectory,1)
             current_traj_idx = current_traj_idx +1;
         end
@@ -39,20 +43,10 @@ end
 
 %[t s] = ode45(@eom,tspan,s0);
 
-% figure(1)
-% p=plot(t,s,'LineWidth',1);
-% p(1).LineStyle = '--'; 
-% p(2).LineStyle = '--';
-% p(3).LineStyle = '--';
-% p(7).LineStyle = '-.';
-% p(8).LineStyle = '-.';
-% p(9).LineStyle = '-.';
-% legend('x','y','z','$\phi$','$\theta$','$\psi$','$\dot{x}$','$\dot{y}$','$\dot{z}$','$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$','Interpreter','latex','Fontsize',12)
-% 
-
 figure(2)
 positions = s_save(:,1:3);
 angles = s_save(:,7:9);
-%animate(positions,angles);
-plot(s_save(:,1:3))
-legend('x','y','z')
+animate(positions,angles,trajectory);
+
+%plot(t_save,s_save(:,1:3),t_save(1:6:end),traj_save(1:3,:))
+%legend('x','y','z')
