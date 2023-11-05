@@ -1,11 +1,17 @@
-function animate(positions,angles,trajectory)
+function animate(positions,angles,trajectory,des_trajectory)
     [m,g,Ix,Iy,Iz,l,k,b]=get_model();
     axle_x = [-l/2 0 0;
                l/2 0 0];
     axle_y = [0 -l/2 0;
               0  l/2 0];
-          
-    dmax = max([max(positions),l]);
+
+    xmax = max(max(positions(:,1)),l);
+    ymax = max(max(positions(:,2)),l);
+    zmax = max(max(positions(:,3)),l);
+
+    xmin = min(min(positions(:,1)),l);
+    ymin = min(min(positions(:,2)),l);
+    zmin = min(min(positions(:,3)),l);
     
     r = 0.1*l; %radius of propellers
     ang = linspace(0,2*pi);
@@ -18,6 +24,8 @@ function animate(positions,angles,trajectory)
     [p1,q1] = size(propeller);
     [p2,q2] = size(axle_x);
     [mm,nn] = size(angles);
+    traj_size = size(trajectory,1);
+    traj_step = floorDiv(mm,traj_size);
     for ii=1:mm
         x = positions(ii,1);
         y = positions(ii,2);
@@ -50,19 +58,27 @@ function animate(positions,angles,trajectory)
         new_propeller3 = new_axle_x(2,:) + new_propeller;
         new_propeller2 = new_axle_y(1,:) + new_propeller;
         new_propeller4 = new_axle_y(2,:) + new_propeller;
-            plot3(trajectory(:,1),trajectory(:,2),trajectory(:,3),'o--');
-
-         line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
-         line(new_axle_y(:,1),new_axle_y(:,2),new_axle_y(:,3),'Linewidth',2);
+        ii_2 = floorDiv(ii,traj_step);
+        if ii_2 >0
+            plot3(trajectory(1:ii_2,1),trajectory(1:ii_2,2),trajectory(1:ii_2,3), ...
+                    '-o','Color','r','MarkerSize',2);
+        end
+        hold on
+        plot3(des_trajectory(:,1),des_trajectory(:,2),des_trajectory(:,3),'o--b');
+        hold off
+        line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
+        line(new_axle_y(:,1),new_axle_y(:,2),new_axle_y(:,3),'Linewidth',2);
         patch(new_propeller1(:,1),new_propeller1(:,2),new_propeller1(:,3),'r');
         patch(new_propeller2(:,1),new_propeller2(:,2),new_propeller2(:,3),'g');
         patch(new_propeller3(:,1),new_propeller3(:,2),new_propeller3(:,3),'b');
         patch(new_propeller4(:,1),new_propeller4(:,2),new_propeller4(:,3),'c');
-        axis(1.2*[-dmax dmax -dmax dmax 0 dmax]);
+        %axis(1.05*[xmin xmax ymin ymax zmin zmax]);
+        axis(1.5*[xmin xmax ymin ymax zmin zmax]);
+        
         xlabel('x'); ylabel('y'); zlabel('z');
         %view(0,90)
         view(3)
-        pause(0.001)
+        pause(0.0001)
         if (ii~=mm)
             clf
         end
