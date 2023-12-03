@@ -1,4 +1,3 @@
-% No SIMULINK MPC TRY
 clc
 
 % Simulation parameters
@@ -16,26 +15,37 @@ u0 = repmat(u_hover, N, 1);
 %   Initial position and orientation
 current_pos = 0*ones(12,1);
 
+%% Trajectory Generation
 %Setting the first waypoint target
 % load("waypoints_square.mat");
 % waypoints = waypoint_gen(waypoints_square);
-delta_theta = 0.9;
+delta_theta = 0.5;
 radius = 1.0;
 z = 1;
 waypoints = [];
-% 
-% for i = 0:delta_theta:360
-%     x = radius*cos(deg2rad(i));
-%     y = radius*sin(deg2rad(i));
-%     waypoints = [waypoints; x y z 0];
-% end
 
-for t = 0:delta_theta:360
-    t = deg2rad(t);
-    x = (radius * sqrt(2) * cos(t)) ./ (1 + sin(t).^2);
-    y = (radius * sqrt(2) * cos(t) .* sin(t)) ./ (1 + sin(t).^2);
+% Circle shaped 
+total_height = 5;
+increment = total_height/401;
+z = 0;
+for i = 0:delta_theta:360
+    x = radius*cos(deg2rad(i));
+    y = radius*sin(deg2rad(i));
+    z = z + increment;
     waypoints = [waypoints; x y z 0];
 end
+
+% infinity shaped
+% total_height = 5;
+% increment = total_height/401;
+% z = 0;
+% for t = 0:delta_theta:360
+%     t = deg2rad(t);
+%     x = (radius * sqrt(2) * cos(t)) ./ (1 + sin(t).^2);
+%     y = (radius * sqrt(2) * cos(t) .* sin(t)) ./ (1 + sin(t).^2);
+%     z = z + increment;
+%     waypoints = [waypoints; x y z 0];
+% end
 % 
 % distance = norm(current_pos(1:3) - waypoints(1,:));
 % step_incre = distance/50;
@@ -47,6 +57,7 @@ end
 % end
 % waypoints = [extra_points; waypoints];
 
+%% MPC RUNS HERE
 i = 1;
 current_waypoint_targ = waypoints(i,:);
 targ_waypoint_window = waypoints(i:N,:);
