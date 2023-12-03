@@ -64,7 +64,7 @@ function animate(positions,angles,trajectory,des_trajectory)
                     '-o','Color','r','MarkerSize',2);
         end
         hold on
-        plot3(des_trajectory(:,1),des_trajectory(:,2),des_trajectory(:,3),'o--b');
+        plot3(des_trajectory(:,1),des_trajectory(:,2),des_trajectory(:,3),'b');
         hold off
         line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
         line(new_axle_y(:,1),new_axle_y(:,2),new_axle_y(:,3),'Linewidth',2);

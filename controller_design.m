@@ -1,5 +1,3 @@
-clear;
-close all;
 %% PID using LQR
 [m,g,Ix,Iy,Iz,l,k,b]=get_model();
 omega_eq = sqrt((m*g/4)/k);     % By solving for u when sdot = 0 = f(s,u)
@@ -12,102 +10,17 @@ u_nom = [omega1;omega2;omega3;omega4];
 s_nom = [0;0;0;0;0;0;0;0;0;0;0;0];
 
 [A,B]=eval_jacobian(s_nom,u_nom);
-[nx,nu] = size(B);
-ny = nx; C = eye(ny);
-
-P_ol=ss(A,B,C,0);
-
-disp("Uncontrollable states: ")
-Ctrb = ctrb(A,B);
-unco = length(A) - rank(Ctrb);
-disp(unco)
-
-%% LQI Control
-
-% Augmenting the system with integrator states
-Aaug = [A zeros(nx,ny);C zeros(ny,ny)];
-Baug = [B; zeros(ny,nu)];
-
-stabilizable = [A B;C zeros(ny,nu)];
-expectedrank = nx + ny;
-rankDeficiency = (expectedrank - rank(stabilizable));
-disp("Unstabilizable integral control states")
-disp(rankDeficiency)
-
-% The system is not stabilizable, 
-% now let's assume the output is
-% y=[dx dy dz dpsi].T
-
-% Augmenting the system with integrator states
-C = [1 0 0 0 0 0 0 0 0 0 0 0;
-     0 1 0 0 0 0 0 0 0 0 0 0;
-     0 0 1 0 0 0 0 0 0 0 0 0;
-     0 0 0 0 0 0 0 0 1 0 0 0];
-ny = 4;
-Aaug = [A zeros(nx,ny);C zeros(ny,ny)];
-Baug = [B; zeros(ny,nu)];
-
-stabilizable = [A B;C zeros(ny,nu)];
-expectedrank = nx + ny;
-rankDeficiency = (expectedrank - rank(stabilizable));
-disp("Unstabilizable integral control states")
-disp(rankDeficiency)
-
-% This system is stabilizable
-
-
-%% LQI Weighing Matrices
-
-Qx=diag([100 100 100 10 10 10 100 100 10 40 40 20]); % shape ny
-QI=diag([0.1 0.1 0.1 0.1]); % shape ny
-Qaug = blkdiag(Qx, QI);
-R=diag([1/30 1/30 1/30 1/30]); % shape nu
-
-[Kaug,S,P] = lqr(Aaug, Baug, Qaug, R);
-Kx = Kaug(:,1:nx);
-KI = Kaug(:,nx+1:nx+ny);
-
-% Feedforward term
-G = inv(C/(-A+B*Kx)*B);
-
-disp("Closed-loop LQI poles")
+%Q=diag([80 80 80 10 10 10 12 12 12 8 8 8]); 
+Q=diag([50 50 50 5 5 5 2 2 2 1 1 1]);
+R=diag([1/225 1/225 1/225 1/225]); 
+[K,S,P]=lqr(A,B,Q,R);
 disp(P)
-disp("LQI Gain: ")
-disp(Kaug)
-disp("Precompensator Gain: ")
-disp(G)
+disp(K)
+
+P_cl=ss(A-B*K,B,eye(12),0);
 
 % Form loop for state-feedback
-Lsf = ss(Aaug, Baug, Kaug,0);
-
-% State-feedback gain/phase/S-based disk margins
-AMsf = allmargin(Lsf);
-DMsf = diskmargin(Lsf);
-
-disp("Disk Margins (>0.4): ")
-DMsf(1).DiskMargin
-DMsf(2).DiskMargin
-DMsf(3).DiskMargin
-DMsf(4).DiskMargin
-
-%% Closed Loop Transfer functions
-
-Acl = Aaug-Baug*Kaug;
-Bcl = [B*G; -eye(ny)];
-Ccl = [C zeros(ny,ny)];
-
-Pcl = ss(Acl, Bcl, Ccl, 0);
-Pu = ss(Acl, Bcl, -Kaug, 0);
-
-%% Step response plots
-figure(1)
-step(Pcl)
-figure(2)
-step(Pu)
-
-
-%% Penalize the error
-
-Qy = C*Qx*C';
-
-([0.1;0.1;0.1;0.4] - [0;0;0;0])'*Qy*([0.1;0.1;0.1;0.4] - [0;0;0;0])
+Lsf = K*ss(A,B,eye(12),0);
+allmargin(Lsf)
+MMIO = diskmargin(ss(A,B,eye(12),0),K)
+[np, wp] = norm(P_cl,inf)
