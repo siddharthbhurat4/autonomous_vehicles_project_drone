@@ -14,7 +14,7 @@ function waypoint_list = waypoint_gen(waypoints)
         end
         for j = 1:divisions
             
-            next_point = [waypoints(i,1:3)+difference(1:3).*(j/divisions),waypoints(i,4:sz(2))+difference(4:sz(2)) ];
+            next_point = [waypoints(i,1:4)+difference(1:4).*(j/divisions)];
             waypoint_list = [waypoint_list; next_point];
         end
         

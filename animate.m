@@ -1,17 +1,15 @@
 function animate(positions,angles,trajectory,des_trajectory)
-    [m,g,Ix,Iy,Iz,l,k,b]=get_model();
-    axle_x = [-l/2 0 0;
-               l/2 0 0];
-    axle_y = [0 -l/2 0;
-              0  l/2 0];
+    [~,~,~,~,~,l,~,~]=get_model();
+    axle_x = [-l/2 0 0; l/2 0 0];
+    axle_y = [0 -l/2 0; 0 l/2 0];
 
-    xmax = max(max(positions(:,1)),l);
-    ymax = max(max(positions(:,2)),l);
-    zmax = max(max(positions(:,3)),l);
+    xmax = max(max(max(des_trajectory(:,1)),l),max(trajectory(:,1)));
+    ymax = max(max(max(des_trajectory(:,2)),l),max(trajectory(:,2)));
+    zmax = max(max(max(des_trajectory(:,3)),l),max(trajectory(:,3)));
 
-    xmin = min(min(positions(:,1)),l);
-    ymin = min(min(positions(:,2)),l);
-    zmin = min(min(positions(:,3)),l);
+    xmin = min(min(min(des_trajectory(:,1)),l),min(trajectory(:,1)));
+    ymin = min(min(min(des_trajectory(:,2)),l),min(trajectory(:,2)));
+    zmin = min(min(min(des_trajectory(:,3)),l),min(trajectory(:,3)));
     
     r = 0.1*l; %radius of propellers
     ang = linspace(0,2*pi);
@@ -20,12 +18,14 @@ function animate(positions,angles,trajectory,des_trajectory)
     z_circle = zeros(1,length(ang));
     propeller = [x_circle',y_circle',z_circle'];
     
-    
     [p1,q1] = size(propeller);
     [p2,q2] = size(axle_x);
     [mm,nn] = size(angles);
     traj_size = size(trajectory,1);
     traj_step = floorDiv(mm,traj_size);
+    new_axle_x = zeros(p2,3);
+    new_axle_y  = zeros(p2,3);
+    new_propeller = zeros(p1,3);
     for ii=1:mm
         x = positions(ii,1);
         y = positions(ii,2);
@@ -40,14 +40,14 @@ function animate(positions,angles,trajectory,des_trajectory)
             r_world = R*r_body;
             new_axle_x(i,:) = r_world';
         end
-        new_axle_x = [x y z] +new_axle_x;
+        new_axle_x = [x y z] + new_axle_x;
         
         for i=1:p2
             r_body = axle_y(i,:)';
             r_world = R*r_body;
             new_axle_y(i,:) = r_world';
         end
-        new_axle_y = [x y z] +new_axle_y;
+        new_axle_y = [x y z] + new_axle_y;
         
         for i=1:p1
             r_body = propeller(i,:)';
@@ -65,6 +65,7 @@ function animate(positions,angles,trajectory,des_trajectory)
         end
         hold on
         plot3(des_trajectory(:,1),des_trajectory(:,2),des_trajectory(:,3),'o--b');
+        %plot3(show_traj(:,1),show_traj(:,2),show_traj(:,3),'x:k','Linewidth',1);
         hold off
         line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
         line(new_axle_y(:,1),new_axle_y(:,2),new_axle_y(:,3),'Linewidth',2);
@@ -72,8 +73,7 @@ function animate(positions,angles,trajectory,des_trajectory)
         patch(new_propeller2(:,1),new_propeller2(:,2),new_propeller2(:,3),'g');
         patch(new_propeller3(:,1),new_propeller3(:,2),new_propeller3(:,3),'b');
         patch(new_propeller4(:,1),new_propeller4(:,2),new_propeller4(:,3),'c');
-        %axis(1.05*[xmin xmax ymin ymax zmin zmax]);
-        axis(1.5*[xmin xmax ymin ymax zmin zmax]);
+        axis(1.05*[xmin xmax ymin ymax zmin zmax]);
         
         xlabel('x'); ylabel('y'); zlabel('z');
         %view(0,90)
@@ -82,4 +82,5 @@ function animate(positions,angles,trajectory,des_trajectory)
         if (ii~=mm)
             clf
         end
+    end
 end

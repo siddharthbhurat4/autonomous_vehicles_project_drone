@@ -58,10 +58,10 @@ disp(rankDeficiency)
 
 %% LQI Weighing Matrices
 
-Qx=diag([100 100 100 10 10 10 100 100 10 40 40 20]); % shape ny
-QI=diag([0.1 0.1 0.1 0.1]); % shape ny
+Qx=diag([100 100 120 10 10 10 100 100 200 40 40 10]); % shape ny
+QI=diag([0.1 0.1 0.1 0.1])*0.01; % shape ny
 Qaug = blkdiag(Qx, QI);
-R=diag([1/30 1/30 1/30 1/30]); % shape nu
+R=diag([1/30 1/30 1/30 1/30])*0.1; % shape nu
 
 [Kaug,S,P] = lqr(Aaug, Baug, Qaug, R);
 Kx = Kaug(:,1:nx);
@@ -111,3 +111,6 @@ step(Pu)
 Qy = C*Qx*C';
 
 ([0.1;0.1;0.1;0.4] - [0;0;0;0])'*Qy*([0.1;0.1;0.1;0.4] - [0;0;0;0])
+
+
+nyquistplot(Lsf)

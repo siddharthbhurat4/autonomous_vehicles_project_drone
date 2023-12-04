@@ -1,12 +1,12 @@
 clear;
 close all;
 
-[K,G] = lqi_gain();
+[K_pre,G_pre] = gain_scheduling();
 s_nom = [0;0;0;0;0;0;0;0;0;0;0;0;0;0;0;0];
 s0=s_nom;
 u_nom = get_u_nom(0,0); % Hover
 
-max_time = 20;             % time horizon (sec)
+max_time = 30;             % time horizon (sec)
 tstep    = 0.025; % this determines the time step at which the solution is given
 cstep    = 0.05; % image capture time interval
 max_iter = max_time/cstep; % max iteration
@@ -18,21 +18,29 @@ s_save = [s0.'];
 t_save = [0];
 traj_save = [];
 
-load('waypoints_file.mat');
+%load('waypoints_file.mat');
+waypoints_checkpoint2 = [0	0	0	0
+%2	2	2	0.7
+%-2	-2	3	-0.7
+%-2	-2	3	2.5
+2	2	2	0
+-2	-2	3	0
+-2	3	1	0
+0	0	0	0];
 trajectory = waypoint_gen(waypoints_checkpoint2);
-%trajectory = (minjerkpolytraj(waypoints_checkpoint2',[0 1 2 3],20))';
+%trajectory = (minjerkpolytraj(waypoints_checkpoint2',[0 1 2 3,4,5,6],50))';
 current_traj_idx = 1;
 
 for iter = 1:max_iter
     tspan = time:tstep:time+cstep;
     s_ref = [trajectory(current_traj_idx,:)].';
-    [t, s] = ode78(@(t,s) eom(t, s, K, G, s_nom, u_nom, s_ref),tspan,curr_state);
+    [t, s] = ode78(@(t,s) eom(t, s, K_pre, G_pre, s_nom, u_nom, s_ref),tspan,curr_state);
     curr_state  = s(end, :)';
     time = time + cstep;
     s_save = [s_save; s(2:end,:)];
     t_save = [t_save; t(2:end)];
     traj_save = [traj_save,curr_state];
-    if norm(s_ref(1:4) - curr_state(1:4))<0.4
+    if norm(s_ref(1:4) - curr_state([1 2 3 9]))<0.4
         if current_traj_idx < size(trajectory,1)
             current_traj_idx = current_traj_idx +1;
         end
@@ -59,8 +67,8 @@ p(16).LineWidth = 2;
 hold on
 yline(s_ref,LineStyle=":")
 legend('x','y','z', ...
-    '$\phi$','$\theta$','$\psi$', ...
     '$\dot{x}$','$\dot{y}$','$\dot{z}$', ...
+    '$\phi$','$\theta$','$\psi$', ...
     '$\dot{\phi}$','$\dot{\theta}$','$\dot{\psi}$', ...
     'exdot','eydot','ezdot','epsidot', ...
     'Interpreter','latex','Fontsize',12)
