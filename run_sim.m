@@ -18,18 +18,51 @@ s_save = [s0.'];
 t_save = [0];
 traj_save = [];
 
-%load('waypoints_file.mat');
-waypoints_checkpoint2 = [0	0	0	0
-%2	2	2	0.7
-%-2	-2	3	-0.7
-%-2	-2	3	2.5
-2	2	2	0
--2	-2	3	0
--2	3	1	0
-0	0	0	0];
-trajectory = waypoint_gen(waypoints_checkpoint2);
-%trajectory = (minjerkpolytraj(waypoints_checkpoint2',[0 1 2 3,4,5,6],50))';
+%set 1 to use RRT or 0 to not
+RRT = 1;
+if RRT
+    load("map_cube.mat")
+    omap = map3D;
+    ss = stateSpaceSE3([0 5;0 5;0 5;Inf Inf;Inf Inf;Inf Inf;Inf Inf]);
+    
+    sv = validatorOccupancyMap3D(ss, ...
+         Map = omap, ...
+         ValidationDistance = 0.2);
+    
+    planner = plannerRRT(ss,sv, ...
+              MaxConnectionDistance = .4,...
+              MaxIterations = 8000, ...
+              MaxNumTreeNodes = 6000, ...
+              GoalReachedFcn = @(~,s,g)(norm(s(1:3)-g(1:3))<.1), ...
+              GoalBias = 0.3);
+    
+    start = [0 0 0 0 0 0 1];
+    goal = [2 2 2 0 0 0 1];
+    
+    [pthObj,solnInfo] = plan(planner,start,goal);
+
+    zeroColumn = zeros(size(pthObj.States, 1), 1);  % Column of zeros with the same number of rows as A
+
+    trajectory = waypoint_gen([pthObj.States(:,1:3),zeroColumn]);
+
+
+else
+    %load('waypoints_file.mat');
+    waypoints_checkpoint2 = [0	0	0	0
+    %2	2	2	0.7
+    %-2	-2	3	-0.7
+    %-2	-2	3	2.5
+    2	2	2	0
+    -2	-2	3	0
+    -2	3	1	0
+    0	0	0	0];
+    trajectory = waypoint_gen(waypoints_checkpoint2);
+    %trajectory = (minjerkpolytraj(waypoints_checkpoint2',[0 1 2 3,4,5,6],50))';
+    
+end
 current_traj_idx = 1;
+
+
 
 for iter = 1:max_iter
     tspan = time:tstep:time+cstep;

@@ -65,6 +65,31 @@ function animate(positions,angles,trajectory,des_trajectory)
         end
         hold on
         plot3(des_trajectory(:,1),des_trajectory(:,2),des_trajectory(:,3),'o--b');
+
+        plot_obs = 1;
+        if plot_obs
+            % Define the vertices of the cube
+            d = 0.5; % half length of the cube
+            vertices = [1-d, 1-d, 1-d;  % Vertex 1
+                        1+d, 1-d, 1-d;  % Vertex 2
+                        1+d, 1+d, 1-d;  % Vertex 3
+                        1-d, 1+d, 1-d;  % Vertex 4
+                        1-d, 1-d, 1+d;  % Vertex 5
+                        1+d, 1-d, 1+d;  % Vertex 6
+                        1+d, 1+d, 1+d;  % Vertex 7
+                        1-d, 1+d, 1+d]; % Vertex 8
+            
+            % Define the faces of the cube
+            faces = [1, 2, 3, 4;  % Face 1
+                     2, 6, 7, 3;  % Face 2
+                     6, 5, 8, 7;  % Face 3
+                     5, 1, 4, 8;  % Face 4
+                     4, 3, 7, 8;  % Face 5
+                     5, 6, 2, 1]; % Face 6
+            
+            % Plot the cube
+            patch('Vertices', vertices, 'Faces', faces, 'FaceColor', 'g');
+        end 
         %plot3(show_traj(:,1),show_traj(:,2),show_traj(:,3),'x:k','Linewidth',1);
         hold off
         line(new_axle_x(:,1),new_axle_x(:,2),new_axle_x(:,3),'Linewidth',2); hold on;
