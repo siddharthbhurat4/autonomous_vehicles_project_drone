@@ -1,4 +1,4 @@
-clc
+clear,clc
 
 % Simulation parameters
 T_MPC = 0.1;
@@ -19,21 +19,24 @@ current_pos = 0*ones(12,1);
 %Setting the first waypoint target
 % load("waypoints_square.mat");
 % waypoints = waypoint_gen(waypoints_square);
-delta_theta = 0.5;
+delta_theta = 1.3;
 radius = 1.0;
 z = 1;
 waypoints = [];
 
 % Circle shaped 
 total_height = 5;
-increment = total_height/401;
-z = 0;
+increment = 0;%total_height/401;
+% z = 0;
 for i = 0:delta_theta:360
     x = radius*cos(deg2rad(i));
     y = radius*sin(deg2rad(i));
     z = z + increment;
     waypoints = [waypoints; x y z 0];
 end
+
+% testing landing
+% waypoints = [waypoints; 0 0 0 0];
 
 % infinity shaped
 % total_height = 5;
@@ -63,15 +66,16 @@ current_waypoint_targ = waypoints(i,:);
 targ_waypoint_window = waypoints(i:N,:);
 dist_pos = [current_pos(1),current_pos(2),current_pos(3),current_pos(9)]';
 
-
 %Setting the threshold for condition to check if waypoint is reached
-reach_cond_thresh = 0.3;
+reach_cond_thresh = 0.5;
 end_window = N;
 pose = [];
-
+length = size(waypoints,1);
+disp("Total Waypoints: ")
+disp(length)
 %MPC ?
 while i < size(waypoints,1)  
-    if i == size(waypoints,1)
+    if i == length
         break;
     end
     if norm(current_waypoint_targ - dist_pos) < reach_cond_thresh
@@ -88,15 +92,14 @@ while i < size(waypoints,1)
     current_waypoint_targ = waypoints(i,:)';
     
     options = optimoptions('fmincon','Algorithm','sqp', 'MaxFunctionEvaluations',6*1200000);   %   Last entry sets the algorithm to SQP
-    u_opt = fmincon(@(u)drone_objective(u,current_pos,N,T_MPC,current_waypoint_targ,targ_waypoint_window    ),u0,[],[],[],[],[],[],@(u)drone_constraints(u,current_pos,N,T_MPC,current_waypoint_targ,targ_waypoint_window),options);
+    u_opt = fmincon(@(u)drone_objective(u,current_pos,N,T_MPC,current_waypoint_targ,targ_waypoint_window,waypoints),u0,[],[],[],[],[],[],@(u)drone_constraints(u,current_pos,N,T_MPC,current_waypoint_targ,targ_waypoint_window),options);
+    
     disp("Current Control Input")
     disp(u_opt(1,:))
     disp("Current Position")
     disp(current_pos(1:3))
     disp("Current Waypoint Target")
     disp(current_waypoint_targ(1:3))
-    % disp("Current Control Input")
-    % disp(u_opt(1,:))
 
     K1 = drone_dynamics(current_pos,u_opt(1,:));
     K2 = drone_dynamics(current_pos+K1*delta_T/2,u_opt(1,:));

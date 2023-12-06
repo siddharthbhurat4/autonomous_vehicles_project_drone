@@ -1,4 +1,4 @@
-function J = drone_objective(u,current_pos_feedback,horizon_length,T_MPC,current_waypoint_targ,targ_waypoint_window)
+function J = drone_objective(u,current_pos_feedback,horizon_length,T_MPC,current_waypoint_targ,targ_waypoint_window,all_waypoints)
     % u,x_pos,y_pos,psi,N,T_MPC
     N = horizon_length;        % horizon length
     delta_T = T_MPC;   % time step
@@ -20,6 +20,7 @@ function J = drone_objective(u,current_pos_feedback,horizon_length,T_MPC,current
 
     Q = eye(6);
     R = eye(6);
+    O = eye(3);
     
     %   Step through the horizon to calculate the objective function value
     J = 0;
@@ -48,13 +49,18 @@ function J = drone_objective(u,current_pos_feedback,horizon_length,T_MPC,current
         cost_state = [state(1) state(2) state(3) state(9) state(7) state(8)]'; %%Can also adjust this using Q later
         cost_vel = [state(4) state(5) state(6) state(10) state(11) state(12)]';
         cost_accel = [K_weighted(4) K_weighted(5) K_weighted(6) K_weighted(10) K_weighted(11) K_weighted(12)]';
-        % disp("Orientation")
-        % state(7)
-        % state(8)
-        % state(9)
+
         % J = J + 100*(cost_state-[targ_waypoint_window(i,:)';0;0;0;0;0])'*Q*(cost_state-[targ_waypoint_window(i,:)';0;0;0;0;0]) + 0.01*((u(i-1,:)'-[225; -225; 225; -225])'*(u(i-1,:)'-[225; -225; 225; -225]));
         % J = J + 100*(cost_state-[targ_waypoint_window(i,:)';0;0])'*Q*(cost_state-[targ_waypoint_window(i,:)';0;0]) + 0.1*cost_vel'*R*cost_vel + 0.01*((u(i-1,:)'-[225; -225; 225; -225])'*(u(i-1,:)'-[225; -225; 225; -225]));
-        J = J + 100*(cost_state-[targ_waypoint_window(i,:)';deg2rad(0);deg2rad(0)])'*Q*(cost_state-[targ_waypoint_window(i,:)';0;0]) + 0.0*cost_vel'*R*cost_vel + 0.01*((u(i-1,:)'-[225; -225; 225; -225])'*(u(i-1,:)'-[225; -225; 225; -225])) + 0.1*cost_accel'*R*cost_accel;
+        %100
+        positional_penalty = 100*(cost_state-[targ_waypoint_window(i,:)';deg2rad(20);deg2rad(20)])'*Q*(cost_state-[targ_waypoint_window(i,:)';0;0]);
+        velocity_penalty = 0.0*cost_vel'*R*cost_vel;
+        hovering_penalty = 0.01*((u(i-1,:)'-[225; -225; 225; -225])'*(u(i-1,:)'-[225; -225; 225; -225]));
+        accel_penalty = 0.1*cost_accel'*R*cost_accel;
+        buffer = 0.5;
+        obstacle_penalty = -0*((state(1:3)-all_waypoints(100,1:3)')'*O*(state(1:3)-all_waypoints(100,1:3)') + buffer);
+
+        J = J + positional_penalty + velocity_penalty + hovering_penalty + accel_penalty + obstacle_penalty;
 
         
         % J = J + (u(i,:)'-[225; -225; 225; -225])'*(u(i,:)'-[225; -225; 225; -225]);
